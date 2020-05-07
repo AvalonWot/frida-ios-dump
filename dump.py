@@ -71,6 +71,10 @@ def get_usb_iphone():
     return device
 
 
+def get_remote_iphone(host):
+    return frida.get_device_manager().add_remote_device(host)
+
+
 def generate_ipa(path, display_name):
     ipa_filename = display_name + '.ipa'
 
@@ -296,6 +300,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--port', dest='ssh_port', help='Specify SSH port')
     parser.add_argument('-u', '--user', dest='ssh_user', help='Specify SSH username')
     parser.add_argument('-P', '--password', dest='ssh_password', help='Specify SSH password')
+    parser.add_argument('-R', '--frida-host', dest='frida_host', help='Frida Use Host Rather Than Usb')
     parser.add_argument('target', nargs='?', help='Bundle identifier or display name of the target app')
 
     args = parser.parse_args()
@@ -307,7 +312,11 @@ if __name__ == '__main__':
         parser.print_help()
         sys.exit(exit_code)
 
-    device = get_usb_iphone()
+    device = None
+    if args.frida_host is not None:
+        device = get_remote_iphone(args.frida_host)
+    else:
+        device = get_usb_iphone()
 
     if args.list_applications:
         list_applications(device)
